@@ -1,4 +1,4 @@
-# 💣 DeepSweep
+# 💣 DeepSweep (Minesweeper)
 
 A ridiculously polished single-file Minesweeper clone that I built. (Well, DeepSeek and I made it). It's just a single HTML file (literally just raw HTML, CSS, and JS).
 
