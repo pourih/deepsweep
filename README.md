@@ -2,7 +2,7 @@
 
 A ridiculously polished single-file Minesweeper clone that I built. (Well, DeepSeek and I made it). It's just a single HTML file (literally just raw HTML, CSS, and JS).
 
-### 👉 [Play it live here](https://pourih.github.io/deepsweep/)
+### 👉👉👉👉👉 [Play it live here](https://pourih.github.io/deepsweep/) 👈👈👈👈👈
 
 **Why it's cool:**
 * **No lame guessing:** A background worker guarantees the boards are always solvable using pure logic. 
