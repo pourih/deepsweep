@@ -1387,20 +1387,75 @@
   pauseOverlayEl.addEventListener('click', togglePause);
 
   function initPWA() {
-    const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#111827"/><circle cx="50" cy="50" r="25" fill="#ef4444"/><path d="M50 15 L50 85 M15 50 L85 50 M25 25 L75 75 M25 75 L75 25" stroke="#fff" stroke-width="6" stroke-linecap="round"/><circle cx="40" cy="40" r="5" fill="#fff" opacity="0.6"/></svg>`;
-    const iconUrl = 'data:image/svg+xml;base64,' + btoa(iconSvg);
+    // 1. Generate the icon as a PNG using Canvas
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
     
-    const manifest = {
-      name: 'DeepSweep', short_name: 'DeepSweep', start_url: '.',
-      display: 'standalone', background_color: '#1f2937', theme_color: '#111827',
-      icons: [{ src: iconUrl, sizes: '192x192 512x512', type: 'image/svg+xml' }]
-    };
+    // Draw background
+    ctx.fillStyle = '#111827';
+    ctx.fillRect(0, 0, 512, 512);
     
-    const link = document.createElement('link');
-    link.rel = 'manifest';
-    link.href = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(manifest));
-    document.head.appendChild(link);
+    // Draw red circle
+    ctx.fillStyle = '#ef4444';
+    ctx.beginPath();
+    ctx.arc(256, 256, 160, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Draw spikes
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 32;
+    ctx.lineCap = 'round';
+    for (let i = 0; i < 8; i++) {
+      const angle = (i * Math.PI) / 4;
+      const x1 = 256 + Math.cos(angle) * 110;
+      const y1 = 256 + Math.sin(angle) * 110;
+      const x2 = 256 + Math.cos(angle) * 210;
+      const y2 = 256 + Math.sin(angle) * 210;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+    }
+    
+    // Draw highlight
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.beginPath();
+    ctx.arc(220, 220, 32, 0, Math.PI * 2);
+    ctx.fill();
 
+    // 2. Convert to PNG Blob and create URL
+    canvas.toBlob((blob) => {
+      const iconUrl = URL.createObjectURL(blob);
+      
+      // 3. Create the manifest object with the PNG icon
+      const manifest = {
+        name: 'DeepSweep',
+        short_name: 'DeepSweep',
+        start_url: '.',
+        display: 'standalone',
+        background_color: '#1f2937',
+        theme_color: '#111827',
+        icons: [{ 
+          src: iconUrl, 
+          sizes: '512x512', 
+          type: 'image/png',
+          purpose: 'any'
+        }]
+      };
+      
+      // 4. Create manifest Blob URL and inject link
+      const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+      const manifestUrl = URL.createObjectURL(manifestBlob);
+      
+      const link = document.createElement('link');
+      link.rel = 'manifest';
+      link.href = manifestUrl;
+      document.head.appendChild(link);
+    }, 'image/png');
+
+    // Service Worker remains the same
     if ('serviceWorker' in navigator) {
       const swCode = `
         self.addEventListener('install', e => self.skipWaiting());
