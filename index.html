@@ -188,8 +188,6 @@
     min-height: 0;
     overflow: auto;
     display: flex;
-    align-items: center;
-    justify-content: center;
     padding: 0;
     position: relative;
   }
@@ -208,6 +206,7 @@
     display: grid;
     gap: var(--gap);
     width: max-content;
+    margin: auto; /* Fixed the left-scroll clipping issue */
   }
 
   .cell {
@@ -456,7 +455,7 @@
   body.theme-classic #board {
     --gap: 0px;
     border: 1px solid #808080;
-    margin: 4px;
+    margin: auto;
   }
 
   body.theme-classic .cell {
@@ -817,7 +816,7 @@
     mineCountEl.textContent = remaining;
     mineCountEl.classList.toggle('negative', remaining < 0);
 
-    if (gameOver || isPaused) return; // Don't override game over/pause messages
+    if (gameOver || isPaused) return;
 
     if (remaining < 0) {
       statusEl.innerHTML = '<span class="warning-title">⚠️ Too many flags placed!</span><span class="warning-sub">You have more flags than mines. Remove a flag to continue.</span>';
@@ -832,7 +831,6 @@
     isFlagMode = !isFlagMode;
     modeToggleEl.classList.toggle('active', isFlagMode);
     modeToggleEl.textContent = isFlagMode ? '🚩 Flag Mode: ON' : '🚩 Flag Mode: OFF';
-    // Calling updateMineCounter ensures we don't overwrite the warning if flags are too high
     updateMineCounter(); 
   }
 
@@ -1290,7 +1288,7 @@
   function cancelPress() { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } }
 
   boardEl.addEventListener('pointerdown', (e) => {
-    if (isPaused || isFlagMode) return; // Skip long press entirely in flag mode
+    if (isPaused || isFlagMode) return; 
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     const el = e.target.closest('.cell');
     if (!el) return;
