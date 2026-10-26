@@ -10,7 +10,7 @@
   * { box-sizing: border-box; }
 
   :root {
-    --gap: 3px; /* Middle ground between tight and artifact-prone */
+    --gap: 3px;
     --bg-main: #1f2937;
     --bg-panel: #111827;
     --bg-stat: #0b1220;
@@ -183,13 +183,20 @@
 
   .custom-controls input:focus { outline: 2px solid #2563eb; outline-offset: 1px; }
 
+  .board-container {
+    flex: 1 1 auto;
+    min-height: 0;
+    position: relative; /* New wrapper for pause overlay */
+    display: flex;
+    flex-direction: column;
+  }
+
   .board-wrap {
     flex: 1 1 auto;
     min-height: 0;
     overflow: auto;
     display: flex;
     padding: 0;
-    position: relative;
   }
 
   #fxCanvas {
@@ -301,7 +308,6 @@
   .status.win { color: #22c55e; }
   .status.lose { color: #f87171; }
 
-  /* Warning State for Over-Flagging */
   @keyframes pulseWarning {
     0% { transform: scale(1); }
     50% { transform: scale(1.02); }
@@ -363,14 +369,14 @@
   .pause-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(17, 24, 39, 0.7);
+    background: rgba(17, 24, 39, 0.85);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     display: flex;
+    flex-direction: column; /* Stack text vertically */
     align-items: center;
     justify-content: center;
-    font-size: 32px;
-    font-weight: 800;
+    gap: 12px; /* Breathing room between texts */
     color: var(--text-main);
     z-index: 20;
     border-radius: var(--radius);
@@ -378,6 +384,17 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s;
+  }
+
+  .pause-title {
+    font-size: 32px;
+    font-weight: 800;
+  }
+
+  .pause-subtitle {
+    font-size: 16px;
+    font-weight: 600;
+    opacity: 0.8;
   }
 
   .pause-overlay.active {
@@ -576,10 +593,15 @@
     </div>
   </div>
 
-  <div class="board-wrap" id="boardWrap">
-    <div id="board" role="grid" aria-label="DeepSweep board"></div>
-    <canvas id="fxCanvas"></canvas>
-    <div id="pauseOverlay" class="pause-overlay">Paused<br><span style="font-size:16px">Click to resume</span></div>
+  <div class="board-container">
+    <div class="board-wrap" id="boardWrap">
+      <div id="board" role="grid" aria-label="DeepSweep board"></div>
+      <canvas id="fxCanvas"></canvas>
+    </div>
+    <div id="pauseOverlay" class="pause-overlay">
+      <span class="pause-title">Paused</span>
+      <span class="pause-subtitle">Click to resume</span>
+    </div>
   </div>
 
   <div class="mode-toggle-container">
@@ -1045,7 +1067,7 @@
     const w = boardWrapEl.clientWidth - 4;
     const h = boardWrapEl.clientHeight - 4;
     if (w <= 0 || h <= 0) return;
-    const cellW = (w - (cols - 1) * 3) / cols; // 3px matches --gap
+    const cellW = (w - (cols - 1) * 3) / cols;
     const cellH = (h - (rows - 1) * 3) / rows;
     const baseSize = Math.max(16, Math.min(56, Math.floor(Math.min(cellW, cellH))));
     const size = Math.floor(baseSize * prefs.zoom);
