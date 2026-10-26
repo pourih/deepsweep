@@ -80,7 +80,6 @@
     position: relative;
   }
 
-  /* New Title Header */
   .title-header {
     text-align: center;
     margin-bottom: 16px;
@@ -495,7 +494,7 @@
       <button id="zoomReset" type="button" title="Reset Zoom">1×</button>
       <button id="zoomIn" type="button" title="Zoom In">➕</button>
       <button id="themeToggle" type="button" title="Toggle Theme">🌓</button>
-      <button id="soundToggle" type="button" title="Toggle sound" aria-pressed="false">🔇</button>
+      <button id="soundToggle" type="button" title="Toggle sound" aria-pressed="true">🔊</button>
       <button id="pauseBtn" type="button" title="Pause game">⏸️</button>
       <button id="reset" type="button">New game</button>
     </div>
@@ -706,12 +705,14 @@
   let resumedAt = null;
   let tickId = null;
 
-  let prefs = { sound: false, zoom: 1.0, theme: 'dark' };
+  // Sound now defaults to true
+  let prefs = { sound: true, zoom: 1.0, theme: 'dark' };
 
   function loadPrefs() {
     try {
       const p = JSON.parse(localStorage.getItem('deepsweep.prefs.v1') || '{}');
-      prefs.sound = !!p.sound;
+      // If sound preference isn't set in storage, default to true
+      prefs.sound = p.sound !== undefined ? !!p.sound : true;
       prefs.zoom = p.zoom || 1.0;
       prefs.theme = p.theme || 'dark';
     } catch (e) {}
