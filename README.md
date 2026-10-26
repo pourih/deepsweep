@@ -1,4 +1,4 @@
-# 💣 DeepSweep (Minesweeper)
+<h1>💣 Deep<span style="color: #ef4444">Sweep</span> (Minesweeper)</h1>
 
 A ridiculously polished single-file Minesweeper clone that I built. (Well, DeepSeek and I made it). It's just a single HTML file (literally just raw HTML, CSS, and JS).
 
@@ -11,3 +11,4 @@ A ridiculously polished single-file Minesweeper clone that I built. (Well, DeepS
 * **Phone-friendly:** Auto-scales to your screen. Just long-press to drop a flag.
 * **It remembers:** Auto-saves your current game if you refresh, and tracks your best times.
 * **Offline:** It's a PWA, so you can actually install it and play it on an airplane.
+
