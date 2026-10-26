@@ -10,7 +10,7 @@
   * { box-sizing: border-box; }
 
   :root {
-    --gap: 4px;
+    --gap: 3px; /* Middle ground between tight and artifact-prone */
     --bg-main: #1f2937;
     --bg-panel: #111827;
     --bg-stat: #0b1220;
@@ -206,7 +206,7 @@
     display: grid;
     gap: var(--gap);
     width: max-content;
-    margin: auto; /* Fixed the left-scroll clipping issue */
+    margin: auto;
   }
 
   .cell {
@@ -1045,8 +1045,8 @@
     const w = boardWrapEl.clientWidth - 4;
     const h = boardWrapEl.clientHeight - 4;
     if (w <= 0 || h <= 0) return;
-    const cellW = (w - (cols - 1) * 4) / cols;
-    const cellH = (h - (rows - 1) * 4) / rows;
+    const cellW = (w - (cols - 1) * 3) / cols; // 3px matches --gap
+    const cellH = (h - (rows - 1) * 3) / rows;
     const baseSize = Math.max(16, Math.min(56, Math.floor(Math.min(cellW, cellH))));
     const size = Math.floor(baseSize * prefs.zoom);
     boardEl.style.setProperty('--cell', size + 'px');
