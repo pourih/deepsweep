@@ -10,7 +10,7 @@
   * { box-sizing: border-box; }
 
   :root {
-    --gap: 2px;
+    --gap: 4px;
     --bg-main: #1f2937;
     --bg-panel: #111827;
     --bg-stat: #0b1220;
@@ -27,7 +27,6 @@
     --cell-text: #111827;
     --cell-flagged: #fbbf24;
     --cell-flagged-border: #f59e0b;
-    --cell-question: #3b82f6;
     --cell-mine: #ef4444;
     --radius: 8px;
     --radius-cell: 4px;
@@ -47,7 +46,6 @@
     --cell-revealed: #c0c0c0;
     --cell-text: #000;
     --cell-flagged: #c0c0c0;
-    --cell-question: #c0c0c0;
     --cell-mine: #c0c0c0;
     --radius: 0px;
     --radius-cell: 0px;
@@ -63,7 +61,7 @@
     background: var(--bg-main);
     color: var(--text-main);
     font-family: var(--font);
-    padding: 16px;
+    padding: 8px;
   }
 
   .game {
@@ -75,25 +73,24 @@
     min-height: 0;
     background: var(--bg-panel);
     border-radius: var(--radius);
-    padding: 16px;
+    padding: 10px;
     box-shadow: 0 10px 30px #0008;
     position: relative;
   }
 
   .title-header {
     text-align: center;
-    margin-bottom: 16px;
-    font-size: 28px;
+    margin-bottom: 8px;
+    font-size: 24px;
     font-weight: 800;
     letter-spacing: -0.05em;
     color: var(--text-main);
   }
-  .title-header span {
-    color: #ef4444;
-  }
+  .title-header span { color: #ef4444; }
+  
   body.theme-classic .title-header {
     font-family: 'MS Sans Serif', Tahoma, sans-serif;
-    font-size: 24px;
+    font-size: 22px;
     text-align: left;
     margin-bottom: 8px;
     padding-left: 4px;
@@ -106,17 +103,15 @@
     20%, 60% { transform: translateX(-6px); }
     40%, 80% { transform: translateX(6px); }
   }
-  .game.shake {
-    animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
-  }
+  .game.shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
 
   .topbar {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px 16px;
+    gap: 8px;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
 
   .topbar > * { min-width: 0; }
@@ -124,7 +119,7 @@
   .group { 
     display: flex; 
     flex-wrap: wrap; 
-    gap: 8px; 
+    gap: 6px;
     align-items: center; 
     justify-content: center;
   }
@@ -132,7 +127,7 @@
   .stats { 
     display: flex; 
     flex-wrap: wrap; 
-    gap: 8px; 
+    gap: 6px;
     align-items: center; 
     justify-content: center;
     font-variant-numeric: tabular-nums; 
@@ -140,22 +135,22 @@
 
   .stat {
     background: var(--bg-stat);
-    padding: 6px 10px;
+    padding: 4px 8px;
     border-radius: var(--radius);
-    min-width: 62px;
+    min-width: 50px;
     text-align: center;
     border: 1px solid var(--btn-border);
   }
 
   .stat span {
     display: block;
-    font-size: 10px;
+    font-size: 9px;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: .08em;
   }
 
-  .stat strong { font-size: 16px; transition: color 0.2s; }
+  .stat strong { font-size: 15px; transition: color 0.2s; }
   .stat strong.negative { color: #ef4444; }
 
   select, button {
@@ -164,14 +159,14 @@
     border: 1px solid var(--btn-border);
     background: var(--btn-bg);
     color: var(--text-main);
-    padding: 8px 10px;
+    padding: 6px 8px;
     cursor: pointer;
   }
 
   button:hover, select:hover { background: var(--btn-hover); }
   button.on { background: #1d4ed8; border-color: #1d4ed8; color: #fff; }
 
-  .custom-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center;}
+  .custom-controls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: center;}
   .custom-controls[hidden] { display: none; }
 
   .custom-controls label {
@@ -183,7 +178,7 @@
     font: inherit; border-radius: var(--radius);
     border: 1px solid var(--btn-border);
     background: var(--bg-stat); color: var(--text-main);
-    padding: 6px 8px; width: 62px;
+    padding: 4px 6px; width: 56px;
   }
 
   .custom-controls input:focus { outline: 2px solid #2563eb; outline-offset: 1px; }
@@ -195,7 +190,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 4px;
+    padding: 0;
     position: relative;
   }
 
@@ -234,7 +229,6 @@
     transition: background .08s, transform .08s;
   }
 
-  /* Only apply hover effects on devices that actually support hovering (mice) */
   @media (hover: hover) {
     .cell:not(.revealed):hover { background: var(--cell-hover); }
     body.theme-classic .cell:not(.revealed):hover { background: #d0d0d0; }
@@ -253,12 +247,6 @@
     color: var(--cell-text);
   }
 
-  .cell.question {
-    background: var(--cell-question);
-    border-color: var(--cell-question);
-    color: white;
-  }
-
   .cell.mine { background: var(--cell-mine); color: white; }
   .cell.exploded { background: #dc2626; }
   .cell.wrong { background: #f97316; }
@@ -272,26 +260,100 @@
   .cell.revealed.n7 { color: #111827; }
   .cell.revealed.n8 { color: #6b7280; }
 
-  .status {
+  .mode-toggle-container {
+    display: flex;
+    justify-content: center;
     margin-top: 10px;
+  }
+
+  #modeToggle {
+    width: 100%;
+    max-width: 350px;
+    padding: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+  }
+
+  #modeToggle.active {
+    background: #fbbf24;
+    color: #111827;
+    border-color: #f59e0b;
+  }
+
+  body.theme-classic #modeToggle.active {
+    background: #d0d0d0;
+    color: #f00;
+    border-style: inset;
+    border-color: #808080 #fff #fff #808080;
+  }
+
+  .status {
+    margin-top: 8px;
     text-align: center;
-    min-height: 22px;
+    min-height: 20px;
     font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
   }
 
   .status.win { color: #22c55e; }
   .status.lose { color: #f87171; }
 
-  .stats-line {
-    margin-top: 6px;
-    text-align: center;
+  /* Warning State for Over-Flagging */
+  @keyframes pulseWarning {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+
+  .status.warning {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    border-radius: var(--radius);
+    padding: 8px;
+    color: #f87171;
+    animation: pulseWarning 2s infinite;
+  }
+
+  .status.warning .warning-title {
+    display: block;
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 2px;
+    color: #ef4444;
+  }
+
+  .status.warning .warning-sub {
+    display: block;
     font-size: 13px;
+    font-weight: normal;
+    opacity: 0.9;
+    color: var(--text-main);
+  }
+
+  body.theme-classic .status.warning {
+    background: #c0c0c0;
+    border: 2px solid #f00;
+    color: #f00;
+    animation: none;
+  }
+
+  body.theme-classic .status.warning .warning-title { color: #f00; }
+  body.theme-classic .status.warning .warning-sub { color: #000; }
+
+  .stats-line {
+    margin-top: 4px;
+    text-align: center;
+    font-size: 12px;
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
   }
 
   .footer-credit {
-    margin-top: 16px;
+    margin-top: 8px;
     text-align: center;
     font-size: 11px;
     color: var(--text-muted);
@@ -325,8 +387,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .cell, .pause-overlay { transition: none !important; }
-    .game.shake { animation: none !important; }
+    .cell, .pause-overlay, #modeToggle, .status { transition: none !important; }
+    .game.shake, .status.warning { animation: none !important; }
   }
 
   /* =========================================
@@ -340,7 +402,7 @@
     border-style: outset;
     border-color: #fff #808080 #808080 #fff;
     border-radius: 0;
-    padding: 4px 8px;
+    padding: 2px 6px;
     background: #c0c0c0;
     color: #000;
   }
@@ -412,8 +474,7 @@
     background: #c0c0c0;
   }
 
-  body.theme-classic .cell.flagged,
-  body.theme-classic .cell.question {
+  body.theme-classic .cell.flagged {
     border: 1px solid transparent;
     box-shadow: inset 2px 2px #fff, inset -2px -2px #808080;
     background: #c0c0c0;
@@ -522,7 +583,11 @@
     <div id="pauseOverlay" class="pause-overlay">Paused<br><span style="font-size:16px">Click to resume</span></div>
   </div>
 
-  <div id="status" class="status">Left-click reveal · Right-click or long-press flag</div>
+  <div class="mode-toggle-container">
+    <button id="modeToggle" type="button">🚩 Flag Mode: OFF</button>
+  </div>
+
+  <div id="status" class="status">Tap to reveal · Long-press to flag</div>
   <div id="statsLine" class="stats-line"></div>
   <div class="footer-credit">Developed by DeepSeek V4.1 Flash 1017</div>
 </main>
@@ -702,6 +767,7 @@
   const zoomOutEl = document.getElementById('zoomOut');
   const zoomResetEl = document.getElementById('zoomReset');
   const themeToggleEl = document.getElementById('themeToggle');
+  const modeToggleEl = document.getElementById('modeToggle');
   const gamePanelEl = document.getElementById('gamePanel');
   const fxCanvas = document.getElementById('fxCanvas');
   const boardWrapEl = document.getElementById('boardWrap');
@@ -714,6 +780,7 @@
   let gameOver = false;
   let won = false;
   let isPaused = false;
+  let isFlagMode = false;
   let flagCount = 0;
   let revealedCount = 0;
 
@@ -749,6 +816,24 @@
     const remaining = mineTotal - flagCount;
     mineCountEl.textContent = remaining;
     mineCountEl.classList.toggle('negative', remaining < 0);
+
+    if (gameOver || isPaused) return; // Don't override game over/pause messages
+
+    if (remaining < 0) {
+      statusEl.innerHTML = '<span class="warning-title">⚠️ Too many flags placed!</span><span class="warning-sub">You have more flags than mines. Remove a flag to continue.</span>';
+      statusEl.className = 'status warning';
+    } else if (statusEl.classList.contains('warning')) {
+      statusEl.textContent = isFlagMode ? 'Tap to place flag' : 'Tap to reveal · Long-press to flag';
+      statusEl.className = 'status';
+    }
+  }
+
+  function toggleFlagMode() {
+    isFlagMode = !isFlagMode;
+    modeToggleEl.classList.toggle('active', isFlagMode);
+    modeToggleEl.textContent = isFlagMode ? '🚩 Flag Mode: ON' : '🚩 Flag Mode: OFF';
+    // Calling updateMineCounter ensures we don't overwrite the warning if flags are too high
+    updateMineCounter(); 
   }
 
   let audioCtx = null;
@@ -935,8 +1020,10 @@
       el.classList.add('revealed');
       if (cell.mine) { el.classList.add('mine'); el.textContent = '💣'; }
       else if (cell.adjacent > 0) { el.textContent = cell.adjacent; el.classList.add(`n${cell.adjacent}`); }
-    } else if (cell.mark === 1) { el.classList.add('flagged'); el.textContent = '🚩'; }
-    else if (cell.mark === 2) { el.classList.add('question'); el.textContent = '❓'; }
+    } else if (cell.mark === 1) { 
+      el.classList.add('flagged'); 
+      el.textContent = '🚩'; 
+    }
   }
   function updateAllCells() {
     for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) updateCell(r, c);
@@ -957,12 +1044,12 @@
   }
 
   function fitBoard() {
-    const w = boardWrapEl.clientWidth - 8;
-    const h = boardWrapEl.clientHeight - 8;
+    const w = boardWrapEl.clientWidth - 4;
+    const h = boardWrapEl.clientHeight - 4;
     if (w <= 0 || h <= 0) return;
-    const cellW = (w - 2 * (cols - 1)) / cols;
-    const cellH = (h - 2 * (rows - 1)) / rows;
-    const baseSize = Math.max(16, Math.min(40, Math.floor(Math.min(cellW, cellH))));
+    const cellW = (w - (cols - 1) * 4) / cols;
+    const cellH = (h - (rows - 1) * 4) / rows;
+    const baseSize = Math.max(16, Math.min(56, Math.floor(Math.min(cellW, cellH))));
     const size = Math.floor(baseSize * prefs.zoom);
     boardEl.style.setProperty('--cell', size + 'px');
     resizeCanvas();
@@ -1031,15 +1118,11 @@
       })));
       
       boardEl.style.pointerEvents = '';
-      statusEl.textContent = 'Left-click reveal · Right-click or long-press flag';
+      statusEl.textContent = isFlagMode ? 'Tap to place flag' : 'Tap to reveal · Long-press to flag';
     }
 
     if (cells[r][c].mine) { lose(r, c); return; }
     sound.reveal(); floodReveal(r, c); checkWin(); saveGame();
-  }
-
-  function nextMark(mark) {
-    return (mark + 1) % 3;
   }
 
   function toggleMark(r, c) {
@@ -1047,7 +1130,7 @@
     const cell = cells[r][c];
     if (cell.revealed) return;
     const prev = cell.mark;
-    cell.mark = nextMark(prev);
+    cell.mark = prev === 1 ? 0 : 1;
     if (prev === 1) flagCount--;
     if (cell.mark === 1) flagCount++;
     updateMineCounter(); updateCell(r, c); sound.flag(); saveGame();
@@ -1153,7 +1236,12 @@
     gamePanelEl.classList.remove('shake');
     clearParticles();
     resetTimer(); updateMineCounter();
-    statusEl.textContent = 'Left-click reveal · Right-click or long-press flag'; statusEl.className = 'status';
+    
+    isFlagMode = false;
+    modeToggleEl.classList.remove('active');
+    modeToggleEl.textContent = '🚩 Flag Mode: OFF';
+
+    statusEl.textContent = 'Tap to reveal · Long-press to flag'; statusEl.className = 'status';
     renderBoard(); renderStats(); saveGame();
   }
 
@@ -1177,17 +1265,22 @@
         cells = emptyBoard(rows, cols); started = false; gameOver = false; won = false; revealedCount = 0; flagCount = 0; accumulatedMs = 0; resumedAt = null;
       }
       isPaused = false; pauseOverlayEl.classList.remove('active'); pauseBtnEl.textContent = '⏸️';
+      
+      isFlagMode = false;
+      modeToggleEl.classList.remove('active');
+      modeToggleEl.textContent = '🚩 Flag Mode: OFF';
+
       gamePanelEl.classList.remove('shake');
       clearParticles();
       updateMineCounter(); renderBoard(); renderStats(); updateTimerDisplay();
 
       if (started && !gameOver) {
-        startTimer(); statusEl.textContent = '(resumed) Left-click reveal · Right-click or long-press flag'; statusEl.className = 'status';
+        startTimer(); statusEl.textContent = '(resumed) Tap to reveal · Long-press to flag'; statusEl.className = 'status';
       } else if (gameOver) {
         statusEl.textContent = won ? `You win! Time: ${Math.floor(accumulatedMs / 1000)}s` : 'Boom! You hit a mine.';
         statusEl.className = 'status ' + (won ? 'win' : 'lose');
       } else {
-        statusEl.textContent = 'Left-click reveal · Right-click or long-press flag'; statusEl.className = 'status';
+        statusEl.textContent = 'Tap to reveal · Long-press to flag'; statusEl.className = 'status';
       }
       return true;
     } catch (e) { return false; }
@@ -1197,7 +1290,7 @@
   function cancelPress() { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } }
 
   boardEl.addEventListener('pointerdown', (e) => {
-    if (isPaused) return;
+    if (isPaused || isFlagMode) return; // Skip long press entirely in flag mode
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     const el = e.target.closest('.cell');
     if (!el) return;
@@ -1221,7 +1314,15 @@
     if (longPressed) { longPressed = false; return; }
     const el = e.target.closest('.cell');
     if (!el) return;
-    reveal(Number(el.dataset.r), Number(el.dataset.c));
+    
+    const r = Number(el.dataset.r);
+    const c = Number(el.dataset.c);
+    
+    if (isFlagMode) {
+      toggleMark(r, c);
+    } else {
+      reveal(r, c);
+    }
   });
 
   boardEl.addEventListener('contextmenu', (e) => {
@@ -1249,6 +1350,8 @@
   zoomInEl.addEventListener('click', () => { prefs.zoom = Math.min(2.5, prefs.zoom + 0.1); savePrefs(); fitBoard(); });
   zoomOutEl.addEventListener('click', () => { prefs.zoom = Math.max(0.5, prefs.zoom - 0.1); savePrefs(); fitBoard(); });
   zoomResetEl.addEventListener('click', () => { prefs.zoom = 1.0; savePrefs(); fitBoard(); });
+  
+  modeToggleEl.addEventListener('click', toggleFlagMode);
 
   function togglePause() {
     if (gameOver || !started) return;
