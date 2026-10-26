@@ -1,4 +1,4 @@
-<h1>💣 Deep<span style="color: #ef4444">Sweep</span> (Minesweeper)</h1>
+# 💣 Deep$\color{red}{\text{Sweep}}$ (Minesweeper)
 
 A ridiculously polished single-file Minesweeper clone that I built. (Well, DeepSeek and I made it). It's just a single HTML file (literally just raw HTML, CSS, and JS).
 
