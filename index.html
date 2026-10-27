@@ -186,7 +186,7 @@
   .board-container {
     flex: 1 1 auto;
     min-height: 0;
-    position: relative; /* New wrapper for pause overlay */
+    position: relative;
     display: flex;
     flex-direction: column;
   }
@@ -366,6 +366,7 @@
     letter-spacing: 0.05em;
   }
 
+  /* ----- Pause Overlay ----- */
   .pause-overlay {
     position: absolute;
     inset: 0;
@@ -373,10 +374,10 @@
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     display: flex;
-    flex-direction: column; /* Stack text vertically */
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 12px; /* Breathing room between texts */
+    gap: 12px;
     color: var(--text-main);
     z-index: 20;
     border-radius: var(--radius);
@@ -386,24 +387,96 @@
     transition: opacity 0.2s;
   }
 
-  .pause-title {
-    font-size: 32px;
-    font-weight: 800;
+  .pause-title { font-size: 32px; font-weight: 800; }
+  .pause-subtitle { font-size: 16px; font-weight: 600; opacity: 0.8; }
+  .pause-overlay.active { opacity: 1; pointer-events: auto; }
+
+  /* ----- Options Modal ----- */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
   }
 
-  .pause-subtitle {
-    font-size: 16px;
-    font-weight: 600;
-    opacity: 0.8;
-  }
-
-  .pause-overlay.active {
+  .modal-overlay.active {
     opacity: 1;
     pointer-events: auto;
   }
 
+  .modal-content {
+    background: var(--bg-panel);
+    border: 1px solid var(--btn-border);
+    border-radius: var(--radius);
+    padding: 20px;
+    width: 90%;
+    max-width: 320px;
+    box-shadow: 0 10px 40px #0008;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .modal-title {
+    font-size: 20px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .options-grid button {
+    padding: 12px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .options-grid .full-width {
+    grid-column: span 2;
+  }
+
+  .close-btn {
+    background: #ef4444;
+    color: white;
+    border-color: #dc2626;
+    font-weight: bold;
+    margin-top: 4px;
+  }
+
+  .close-btn:hover { background: #dc2626; }
+
+  /* Classic Modal Overrides */
+  body.theme-classic .modal-content {
+    border: 2px solid;
+    border-color: #fff #808080 #808080 #fff;
+    box-shadow: none;
+  }
+  
+  body.theme-classic .close-btn {
+    background: #c0c0c0;
+    color: #000;
+    border-style: outset;
+    border-color: #fff #808080 #808080 #fff;
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .cell, .pause-overlay, #modeToggle, .status { transition: none !important; }
+    .cell, .pause-overlay, #modeToggle, .status, .modal-overlay { transition: none !important; }
     .game.shake, .status.warning { animation: none !important; }
   }
 
@@ -583,13 +656,9 @@
       <div class="stat"><span>Time</span><strong id="timer">0</strong></div>
       <div class="stat"><span>Best</span><strong id="bestTime">—</strong></div>
       
-      <button id="zoomOut" type="button" title="Zoom Out">➖</button>
-      <button id="zoomReset" type="button" title="Reset Zoom">1×</button>
-      <button id="zoomIn" type="button" title="Zoom In">➕</button>
-      <button id="themeToggle" type="button" title="Toggle Theme">🌓</button>
-      <button id="soundToggle" type="button" title="Toggle sound" aria-pressed="true">🔊</button>
       <button id="pauseBtn" type="button" title="Pause game">⏸️</button>
       <button id="reset" type="button">New game</button>
+      <button id="optionsBtn" type="button" title="Options">⚙️</button>
     </div>
   </div>
 
@@ -612,6 +681,24 @@
   <div id="statsLine" class="stats-line"></div>
   <div class="footer-credit">Developed by DeepSeek V4.1 Flash 1017</div>
 </main>
+
+<!-- Options Modal -->
+<div id="optionsModal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-title">Options</div>
+    
+    <div class="options-grid">
+      <button id="zoomOut" type="button" title="Zoom Out">➖ Zoom</button>
+      <button id="zoomIn" type="button" title="Zoom In">➕ Zoom</button>
+      <button id="zoomReset" type="button" class="full-width" title="Reset Zoom">🔄 Reset Zoom (1×)</button>
+      
+      <button id="themeToggle" type="button" title="Toggle Theme">🌓 Theme</button>
+      <button id="soundToggle" type="button" title="Toggle sound" aria-pressed="true">🔊 Sound</button>
+    </div>
+
+    <button id="closeOptions" class="close-btn" type="button">Close</button>
+  </div>
+</div>
 
 <script>
 (() => {
@@ -792,6 +879,9 @@
   const gamePanelEl = document.getElementById('gamePanel');
   const fxCanvas = document.getElementById('fxCanvas');
   const boardWrapEl = document.getElementById('boardWrap');
+  const optionsModalEl = document.getElementById('optionsModal');
+  const optionsBtnEl = document.getElementById('optionsBtn');
+  const closeOptionsEl = document.getElementById('closeOptions');
   const ctx = fxCanvas.getContext('2d');
 
   let rows = 9, cols = 9, mineTotal = 10;
@@ -825,7 +915,7 @@
   }
 
   function renderPrefs() {
-    soundToggleEl.textContent = prefs.sound ? '🔊' : '🔇';
+    soundToggleEl.textContent = prefs.sound ? '🔊 Sound' : '🔇 Sound';
     soundToggleEl.classList.toggle('on', prefs.sound);
     soundToggleEl.setAttribute('aria-pressed', String(prefs.sound));
 
@@ -1118,6 +1208,52 @@
   async function reveal(r, c) {
     if (gameOver || isPaused) return;
     const cell = cells[r][c];
+    
+    // Chording (Auto-Reveal) logic
+    if (cell.revealed && cell.adjacent > 0) {
+      let flags = 0;
+      for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          if (dr === 0 && dc === 0) continue;
+          const nr = r + dr, nc = c + dc;
+          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+            if (cells[nr][nc].mark === 1) flags++;
+          }
+        }
+      }
+      
+      if (flags === cell.adjacent) {
+        let hitMine = false;
+        let explodedR = -1, explodedC = -1;
+        
+        for (let dr = -1; dr <= 1; dr++) {
+          for (let dc = -1; dc <= 1; dc++) {
+            if (dr === 0 && dc === 0) continue;
+            const nr = r + dr, nc = c + dc;
+            if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+              const nb = cells[nr][nc];
+              if (!nb.revealed && nb.mark === 0) {
+                if (nb.mine) {
+                  hitMine = true;
+                  explodedR = nr;
+                  explodedC = nc;
+                  break;
+                } else {
+                  floodReveal(nr, nc);
+                }
+              }
+            }
+          }
+          if (hitMine) break;
+        }
+        
+        if (hitMine) { lose(explodedR, explodedC); return; }
+        sound.reveal(); checkWin(); saveGame();
+        return;
+      }
+    }
+
+    // Standard reveal logic
     if (cell.mark !== 0 || cell.revealed) return;
 
     if (!started) {
@@ -1373,6 +1509,12 @@
   
   modeToggleEl.addEventListener('click', toggleFlagMode);
 
+  optionsBtnEl.addEventListener('click', () => optionsModalEl.classList.add('active'));
+  closeOptionsEl.addEventListener('click', () => optionsModalEl.classList.remove('active'));
+  optionsModalEl.addEventListener('click', (e) => {
+    if (e.target === optionsModalEl) optionsModalEl.classList.remove('active');
+  });
+
   function togglePause() {
     if (gameOver || !started) return;
     isPaused = !isPaused;
@@ -1387,75 +1529,20 @@
   pauseOverlayEl.addEventListener('click', togglePause);
 
   function initPWA() {
-    // 1. Generate the icon as a PNG using Canvas
-    const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 512;
-    const ctx = canvas.getContext('2d');
+    const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#111827"/><circle cx="50" cy="50" r="25" fill="#ef4444"/><path d="M50 15 L50 85 M15 50 L85 50 M25 25 L75 75 M25 75 L75 25" stroke="#fff" stroke-width="6" stroke-linecap="round"/><circle cx="40" cy="40" r="5" fill="#fff" opacity="0.6"/></svg>`;
+    const iconUrl = 'data:image/svg+xml;base64,' + btoa(iconSvg);
     
-    // Draw background
-    ctx.fillStyle = '#111827';
-    ctx.fillRect(0, 0, 512, 512);
+    const manifest = {
+      name: 'DeepSweep', short_name: 'DeepSweep', start_url: '.',
+      display: 'standalone', background_color: '#1f2937', theme_color: '#111827',
+      icons: [{ src: iconUrl, sizes: '192x192 512x512', type: 'image/svg+xml' }]
+    };
     
-    // Draw red circle
-    ctx.fillStyle = '#ef4444';
-    ctx.beginPath();
-    ctx.arc(256, 256, 160, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Draw spikes
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 32;
-    ctx.lineCap = 'round';
-    for (let i = 0; i < 8; i++) {
-      const angle = (i * Math.PI) / 4;
-      const x1 = 256 + Math.cos(angle) * 110;
-      const y1 = 256 + Math.sin(angle) * 110;
-      const x2 = 256 + Math.cos(angle) * 210;
-      const y2 = 256 + Math.sin(angle) * 210;
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.stroke();
-    }
-    
-    // Draw highlight
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-    ctx.beginPath();
-    ctx.arc(220, 220, 32, 0, Math.PI * 2);
-    ctx.fill();
+    const link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(manifest));
+    document.head.appendChild(link);
 
-    // 2. Convert to PNG Blob and create URL
-    canvas.toBlob((blob) => {
-      const iconUrl = URL.createObjectURL(blob);
-      
-      // 3. Create the manifest object with the PNG icon
-      const manifest = {
-        name: 'DeepSweep',
-        short_name: 'DeepSweep',
-        start_url: '.',
-        display: 'standalone',
-        background_color: '#1f2937',
-        theme_color: '#111827',
-        icons: [{ 
-          src: iconUrl, 
-          sizes: '512x512', 
-          type: 'image/png',
-          purpose: 'any'
-        }]
-      };
-      
-      // 4. Create manifest Blob URL and inject link
-      const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
-      const manifestUrl = URL.createObjectURL(manifestBlob);
-      
-      const link = document.createElement('link');
-      link.rel = 'manifest';
-      link.href = manifestUrl;
-      document.head.appendChild(link);
-    }, 'image/png');
-
-    // Service Worker remains the same
     if ('serviceWorker' in navigator) {
       const swCode = `
         self.addEventListener('install', e => self.skipWaiting());
