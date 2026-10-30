@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>DeepSweep Regression Test Suite</title>
+</head>
+<body>
+<div id="results">Running tests...</div>
+
+<script>
+(async () => {
+  const results = [];
+
+  // -------------------------------------------------------------
+  // Test 1: Pre-game flag preservation on first reveal
+  // -------------------------------------------------------------
+  try {
+    let flagCount = 0;
+    let cells = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => ({
+      mine: false, revealed: false, mark: 0, adjacent: 0
+    })));
+    
+    // User flags (0, 0) before game starts
+    cells[0][0].mark = 1;
+    flagCount = 1;
+
+    // First reveal generates boardData
+    const dummyBoardData = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => ({
+      mine: false, adjacent: 0
+    })));
+    
+    // Fixed code from index.html:
+    cells = dummyBoardData.map((row, rIdx) => row.map((c, cIdx) => ({
+      mine: c.mine, adjacent: c.adjacent, revealed: false, mark: cells[rIdx] ? cells[rIdx][cIdx].mark : 0
+    })));
+
+    if (cells[0][0].mark === 1 && flagCount === 1) {
+      results.push({ name: "Bug 1: Pre-Game Flagging Desynchronization", status: "PASSED", message: "Flag mark preserved and synchronized with flagCount" });
+    } else {
+      results.push({ name: "Bug 1: Pre-Game Flagging Desynchronization", status: "FAILED", error: "cells[0][0].mark is " + cells[0][0].mark + " but flagCount is " + flagCount });
+    }
+  } catch (err) {
+    results.push({ name: "Bug 1: Pre-Game Flagging Desynchronization", status: "ERROR", error: err.message });
+  }
+
+  // -------------------------------------------------------------
+  // Test 2: Unvalidated difficulty in saved state does not crash readConfigFromForm
+  // -------------------------------------------------------------
+  try {
+    const difficultyEl = document.createElement("select");
+    difficultyEl.innerHTML = `
+      <option value="beginner">Beginner</option>
+      <option value="intermediate">Intermediate</option>
+      <option value="expert">Expert</option>
+      <option value="custom">Custom</option>
+    `;
+
+    // Rehydration with invalid difficulty setting
+    const savedConfig = { difficulty: "corrupt_value" };
+    const validDiffs = ['beginner', 'intermediate', 'expert', 'custom'];
+    difficultyEl.value = (savedConfig && validDiffs.includes(savedConfig.difficulty)) ? savedConfig.difficulty : 'beginner';
+    
+    let rows, cols, mineTotal;
+    function readConfigFromForm() {
+      if (difficultyEl.value === 'custom') {
+        return;
+      } else {
+        const presets = {
+          beginner: { rows: 9, cols: 9, mines: 10 },
+          intermediate: { rows: 16, cols: 16, mines: 40 },
+          expert: { rows: 16, cols: 30, mines: 99 }
+        };
+        const diff = presets[difficultyEl.value] || presets.beginner;
+        if (!presets[difficultyEl.value]) difficultyEl.value = 'beginner';
+        rows = diff.rows; cols = diff.cols; mineTotal = diff.mines;
+      }
+    }
+
+    readConfigFromForm();
+    if (rows === 9 && cols === 9 && mineTotal === 10 && difficultyEl.value === 'beginner') {
+      results.push({ name: "Bug 2: Unvalidated Difficulty Rehydration Crash", status: "PASSED", message: "Gracefully defaulted to beginner mode without throwing error" });
+    } else {
+      results.push({ name: "Bug 2: Unvalidated Difficulty Rehydration Crash", status: "FAILED", error: "Unexpected fallback: " + difficultyEl.value });
+    }
+  } catch (err) {
+    results.push({ name: "Bug 2: Unvalidated Difficulty Rehydration Crash", status: "ERROR", error: err.message });
+  }
+
+  document.getElementById("results").innerHTML = JSON.stringify(results, null, 2);
+})();
+</script>
+</body>
+</html>

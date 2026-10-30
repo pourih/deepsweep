@@ -804,6 +804,7 @@
           Array.from({ length: cols }, () => ({ mine: false, adjacent: 0 }))
         );
         
+        let has3x3Safe = true;
         const safe = new Set();
         for (let dr = -1; dr <= 1; dr++) {
           for (let dc = -1; dc <= 1; dc++) {
@@ -814,6 +815,7 @@
         if (rows * cols - safe.size < mineTotal) {
           safe.clear();
           safe.add(safeR * cols + safeC);
+          has3x3Safe = false;
         }
 
         const indices = [];
@@ -848,7 +850,7 @@
         }
 
         bestBoard = board;
-        if (openingCellCount(board, safeR, safeC, rows, cols) < 2) continue;
+        if (has3x3Safe && openingCellCount(board, safeR, safeC, rows, cols) < 2) continue;
         if (isNoGuessSolvable(board, safeR, safeC, rows, cols)) break;
       }
 
@@ -891,6 +893,7 @@
   let gameOver = false;
   let won = false;
   let isPaused = false;
+  let isGenerating = false;
   let isFlagMode = false;
   let flagCount = 0;
   let revealedCount = 0;
@@ -1206,7 +1209,7 @@
   }
 
   async function reveal(r, c) {
-    if (gameOver || isPaused) return;
+    if (gameOver || isPaused || isGenerating) return;
     const cell = cells[r][c];
     
     // Chording (Auto-Reveal) logic
@@ -1257,23 +1260,74 @@
     if (cell.mark !== 0 || cell.revealed) return;
 
     if (!started) {
+      isGenerating = true;
       started = true;
       startTimer();
       statusEl.textContent = 'Generating board...';
       boardEl.style.pointerEvents = 'none';
 
-      const worker = new Worker(URL.createObjectURL(new Blob([workerCode], {type: 'application/javascript'})));
-      const boardData = await new Promise(resolve => {
-        worker.onmessage = e => resolve(e.data);
-        worker.postMessage({ rows, cols, mineTotal, safeR: r, safeC: c });
-      });
-      worker.terminate();
+      const blobUrl = URL.createObjectURL(new Blob([workerCode], {type: 'application/javascript'}));
+      let worker = null;
+      let boardData = null;
 
-      cells = boardData.map(row => row.map(c => ({
-        mine: c.mine, adjacent: c.adjacent, revealed: false, mark: 0
-      })));
-      
-      boardEl.style.pointerEvents = '';
+      try {
+        worker = new Worker(blobUrl);
+        boardData = await new Promise((resolve, reject) => {
+          worker.onmessage = e => resolve(e.data);
+          worker.onerror = e => reject(e);
+          worker.postMessage({ rows, cols, mineTotal, safeR: r, safeC: c });
+        });
+      } catch (err) {
+        console.warn('Worker generation failed, falling back:', err);
+      } finally {
+        if (worker) worker.terminate();
+        URL.revokeObjectURL(blobUrl);
+        boardEl.style.pointerEvents = '';
+        isGenerating = false;
+      }
+
+      if (boardData) {
+        cells = boardData.map((row, rIdx) => row.map((c, cIdx) => ({
+          mine: c.mine, adjacent: c.adjacent, revealed: false, mark: cells[rIdx] ? cells[rIdx][cIdx].mark : 0
+        })));
+      } else {
+        const safeIndices = new Set();
+        for (let dr = -1; dr <= 1; dr++) {
+          for (let dc = -1; dc <= 1; dc++) {
+            const nr = r + dr, nc = c + dc;
+            if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) safeIndices.add(nr * cols + nc);
+          }
+        }
+        if (rows * cols - safeIndices.size < mineTotal) {
+          safeIndices.clear();
+          safeIndices.add(r * cols + c);
+        }
+        const pool = [];
+        for (let idx = 0; idx < rows * cols; idx++) if (!safeIndices.has(idx)) pool.push(idx);
+        for (let i = pool.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [pool[i], pool[j]] = [pool[j], pool[i]];
+        }
+        for (let i = 0; i < mineTotal && i < pool.length; i++) {
+          const idx = pool[i];
+          cells[(idx / cols) | 0][idx % cols].mine = true;
+        }
+        for (let cr = 0; cr < rows; cr++) {
+          for (let cc = 0; cc < cols; cc++) {
+            if (cells[cr][cc].mine) continue;
+            let count = 0;
+            for (let dr = -1; dr <= 1; dr++) {
+              for (let dc = -1; dc <= 1; dc++) {
+                if (dr === 0 && dc === 0) continue;
+                const nr = cr + dr, nc = cc + dc;
+                if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && cells[nr][nc].mine) count++;
+              }
+            }
+            cells[cr][cc].adjacent = count;
+          }
+        }
+      }
+      updateAllCells();
       statusEl.textContent = isFlagMode ? 'Tap to place flag' : 'Tap to reveal · Long-press to flag';
     }
 
@@ -1282,7 +1336,7 @@
   }
 
   function toggleMark(r, c) {
-    if (gameOver || isPaused) return;
+    if (gameOver || isPaused || isGenerating) return;
     const cell = cells[r][c];
     if (cell.revealed) return;
     const prev = cell.mark;
@@ -1379,7 +1433,13 @@
       customMinesEl.max = rows * cols - 1;
     } else {
       customControlsEl.hidden = true;
-      const diff = { beginner: { rows: 9, cols: 9, mines: 10 }, intermediate: { rows: 16, cols: 16, mines: 40 }, expert: { rows: 16, cols: 30, mines: 99 } }[difficultyEl.value];
+      const presets = {
+        beginner: { rows: 9, cols: 9, mines: 10 },
+        intermediate: { rows: 16, cols: 16, mines: 40 },
+        expert: { rows: 16, cols: 30, mines: 99 }
+      };
+      const diff = presets[difficultyEl.value] || presets.beginner;
+      if (!presets[difficultyEl.value]) difficultyEl.value = 'beginner';
       rows = diff.rows; cols = diff.cols; mineTotal = diff.mines;
     }
   }
@@ -1387,7 +1447,7 @@
   function startNewGame() {
     readConfigFromForm();
     cells = emptyBoard(rows, cols);
-    started = false; gameOver = false; won = false; isPaused = false; flagCount = 0; revealedCount = 0;
+    started = false; gameOver = false; won = false; isPaused = false; isGenerating = false; flagCount = 0; revealedCount = 0;
     pauseOverlayEl.classList.remove('active'); pauseBtnEl.textContent = '⏸️';
     gamePanelEl.classList.remove('shake');
     clearParticles();
@@ -1406,7 +1466,8 @@
     try { data = JSON.parse(localStorage.getItem('deepsweep.save.v1') || 'null'); } catch (e) { return false; }
     if (!data || data.version !== 1) return false;
     try {
-      difficultyEl.value = data.config.difficulty;
+      const validDiffs = ['beginner', 'intermediate', 'expert', 'custom'];
+      difficultyEl.value = (data.config && validDiffs.includes(data.config.difficulty)) ? data.config.difficulty : 'beginner';
       customRowsEl.value = data.config.customRows; customColsEl.value = data.config.customCols; customMinesEl.value = data.config.customMines;
       customMinesEl.max = data.config.rows * data.config.cols - 1;
       customControlsEl.hidden = difficultyEl.value !== 'custom';
